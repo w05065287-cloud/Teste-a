@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Docs Premium</title>
+
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+  textarea, input, select, button { width: 100%; margin-top: 10px; padding: 10px; }
+  button { cursor: pointer; }
+  .box { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+  #juridico { border: 2px dashed red; display: none; }
+  #planos { border: 2px solid #333; }
+  .aviso { font-size: 13px; color: #555; background: #fff3cd; padding: 10px; border-radius: 8px; }
+  .aviso-juridico { font-size: 12px; color: #a00; margin-top: 10px; }
+  @media print {
+    button, select, input { display: none; }
+    body { background: white; }
+  }
+</style>
+</head>
+
+<body>
+
+<h1>📄 IA para Documentos</h1>
+<p>Status do plano: <strong id="statusPlano">FREE</strong></p>
+
+<!-- AVISO GERAL DE IA -->
+<p class="aviso">
+⚠️ <strong>Aviso sobre IA:</strong><br>
+As respostas geradas por inteligência artificial podem conter erros, imprecisões ou informações desatualizadas.
+Sempre confira informações importantes antes de tomar decisões.
+</p>
+
+<div class="box">
+  <label>🔑 API Key do Google Gemini</label>
+  <input id="apiKey" placeholder="Cole sua API Key aqui">
+
+  <label>✍️ Texto</label>
+  <textarea id="inputText" rows="8"></textarea>
+
+  <button onclick="processarIA()">Processar com IA</button>
+  <button onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>
+
+<div class="box">
+  <h2>📤 Resultado</h2>
+  <div id="output"></div>
+</div>
+
+<!-- PLANOS -->
+<div id="planos" class="box">
+  <h2>💎 Planos Premium</h2>
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div style="border:1px solid #aaa;padding:15px;border-radius:8px;width:200px">
+      <h3>Plano Mensal</h3>
+      <p><strong>R$ 19,99 / mês</strong></p>
+      <button onclick="comprarPlano('mensal')">Assinar</button>
+    </div>
+
+    <div style="border:1px solid #aaa;padding:15px;border-radius:8px;width:200px">
+      <h3>Plano Anual</h3>
+      <p><strong>R$ 239,88 / ano</strong></p>
+      <button onclick="comprarPlano('anual')">Assinar</button>
+    </div>
+  </div>
+</div>
+
+<!-- JURÍDICO PREMIUM -->
+<div id="juridico" class="box">
+  <h2>⚖️ Modo Jurídico Premium</h2>
+
+  <select id="acaoJuridica">
+    <option value="resumo">Resumo de processo</option>
+    <option value="peticao">Melhorar petição</option>
+    <option value="explicacao">Explicar em linguagem simples</option>
+    <option value="organizacao">Organizar fatos e pedidos</option>
+  </select>
+
+  <button onclick="processarJuridico()">Processar Jurídico</button>
+
+  <!-- AVISO JURÍDICO -->
+  <p class="aviso-juridico">
+  ⚠️ <strong>Aviso legal:</strong><br>
+  Este recurso utiliza inteligência artificial e pode conter erros.
+  Não substitui advogado, juiz ou defensor público.
+  Use apenas como apoio educacional e organizacional.
+  </p>
+</div>
+
+<script>
+/* =======================
+   SISTEMA + ANTI-CHEAT
+======================= */
+const SISTEMA = {
+  plano: 'free',
+  tentativasFraude: 0
+};
+
+function setPlano(plano) {
+  if (plano !== 'free' && plano !== 'premium') {
+    registrarFraude('Plano inválido');
+    return;
+  }
+  SISTEMA.plano = plano;
+  document.getElementById('statusPlano').innerText = plano.toUpperCase();
+}
+
+function registrarFraude(motivo) {
+  SISTEMA.tentativasFraude++;
+  console.warn('Fraude:', motivo);
+
+  if (SISTEMA.tentativasFraude >= 3) {
+    document.body.innerHTML = `
+      <h1 style="color:red;text-align:center">🚫 Acesso bloqueado</h1>
+      <p style="text-align:center">Atividade suspeita detectada.</p>
+    `;
+  }
+}
+
+setInterval(() => {
+  if (SISTEMA.plano !== 'premium') {
+    document.getElementById('juridico').style.display = 'none';
+  }
+}, 1500);
+
+/* =======================
+   PLANOS
+======================= */
+function comprarPlano(tipo) {
+  setPlano('premium');
+  document.getElementById('juridico').style.display = 'block';
+  document.getElementById('planos').style.display = 'none';
+
+  alert(
+    tipo === 'mensal'
+      ? 'Plano Mensal ativado (R$ 19,99)'
+      : 'Plano Anual ativado (R$ 239,88)'
+  );
+}
+
+/* =======================
+   IA NORMAL
+======================= */
+async function processarIA() {
+  const texto = inputText.value;
+  const key = apiKey.value;
+  if (!texto || !key) return alert('Texto e API Key obrigatórios');
+
+  const res = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + key,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: texto }] }]
+      })
+    }
+  );
+
+  const data = await res.json();
+  output.innerText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Erro';
+}
+
+/* =======================
+   IA JURÍDICA (PREMIUM)
+======================= */
+async function processarJuridico() {
+  if (SISTEMA.plano !== 'premium') {
+    registrarFraude('Tentativa de acesso jurídico');
+    alert('Recurso exclusivo do plano Premium.');
+    return;
+  }
+
+  const texto = inputText.value;
+  const acao = acaoJuridica.value;
+  const key = apiKey.value;
+
+  const prompt = `Você é um assistente jurídico educacional.
+Ação: ${acao}
+Texto:
+${texto}`;
+
+  const res = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + key,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    }
+  );
+
+  const data = await res.json();
+  output.innerText =
+    data.candidates?.[0]?.content?.parts?.[0]?.text || 'Erro jurídico';
+}
+</script>
+
+</body>
+</html>
