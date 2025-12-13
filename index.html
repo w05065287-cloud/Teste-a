@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Documentos com IA Simulada</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        textarea { width: 100%; height: 150px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+        #documento { margin-top: 20px; border: 1px solid #ccc; padding: 20px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Documentos com IA</h1>
+    <p>Descreva o documento que você quer (ex: "Carta formal de demissão" ou "Relatório de vendas mensal"):</p>
+    <textarea id="prompt" placeholder="Digite sua descrição aqui..."></textarea>
+    <br>
+    <button onclick="gerarDocumento()">Gerar Documento</button>
+    <button onclick="gerarPDF()">Baixar/Imprimir como PDF</button>
+
+    <div id="documento"></div>
+
+    <script>
+        function gerarDocumento() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                alert('Digite uma descrição!');
+                return;
+            }
+
+            // Aqui simulamos a IA gerando texto (em um site real, usaria uma API como Grok ou OpenAI)
+            const textoGerado = `
+                <h2>Documento Gerado pela IA</h2>
+                <p><strong>Descrição fornecida:</strong> ${prompt}</p>
+                <hr>
+                <p>Este é um exemplo de documento gerado automaticamente.</p>
+                <p>Em uma versão avançada, a IA criaria conteúdo completo e personalizado aqui, como uma carta, contrato ou relatório.</p>
+                <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                <p>Assinatura: ________________________</p>
+            `;
+
+            document.getElementById('documento').innerHTML = textoGerado;
+        }
+
+        function gerarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const conteudo = document.getElementById('documento').innerHTML;
+            if (!conteudo) {
+                alert('Gere o documento primeiro!');
+                return;
+            }
+
+            doc.html(conteudo, {
+                callback: function (pdf) {
+                    pdf.save('documento-gerado.pdf');
+                    // Ou abre para impressão: window.open(pdf.output('bloburl'));
+                },
+                x: 10,
+                y: 10,
+                html2canvas: { scale: 0.3 }
+            });
+        }
+    </script>
+    <p><small>Nota: Este exemplo simula a IA. Para IA real, integre uma API como a do Grok (x.ai/api) ou OpenAI.</small></p>
+</body>
+</html>
