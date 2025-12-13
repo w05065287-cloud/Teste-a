@@ -6,44 +6,54 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
       padding: 20px;
+      color: #333;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
-    h1 { text-align: center; }
-    textarea, input, select, button {
+    h1 { text-align: center; color: #4f46e5; }
+    textarea, select, button {
       width: 100%;
       margin-top: 10px;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
     button {
-      background: #007bff;
+      background: #4f46e5;
       color: #fff;
       border: none;
       cursor: pointer;
-      border-radius: 5px;
+      font-weight: bold;
     }
-    button:hover { background: #0056b3; }
+    button:hover { background: #3730a3; }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
     #resultado {
       margin-top: 20px;
-      padding: 15px;
+      padding: 20px;
       border: 1px solid #ccc;
-      min-height: 150px;
+      min-height: 200px;
       white-space: pre-wrap;
+      background: #fafafa;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>IA Criadora de Documentos</h1><label>Tipo de documento:</label>
+    <h1>IA Criadora de Documentos</h1><label>Tipo de documento</label>
 <select id="tipo">
   <option>Redação</option>
   <option>Contrato simples</option>
@@ -51,11 +61,15 @@
   <option>Trabalho escolar</option>
 </select>
 
-<label>Descreva o que você quer:</label>
-<textarea id="prompt" placeholder="Ex: Crie um contrato de aluguel simples..."></textarea>
+<label>Descreva o que você quer</label>
+<textarea id="prompt" placeholder="Ex: Redação sobre tecnologia na educação"></textarea>
 
-<button onclick="gerarDocumento()">Gerar documento</button>
-<button onclick="imprimirDocumento()">Imprimir</button>
+<div class="buttons">
+  <button onclick="gerarDocumento()">Gerar documento</button>
+  <button onclick="imprimirDocumento()">Imprimir</button>
+  <button onclick="salvarTXT()">Salvar TXT</button>
+  <button onclick="salvarPDF()">Salvar PDF</button>
+</div>
 
 <div id="resultado"></div>
 
@@ -63,21 +77,53 @@
     function gerarDocumento() {
       const tipo = document.getElementById('tipo').value;
       const prompt = document.getElementById('prompt').value;
+      const variantes = [
+        "Este texto foi elaborado de forma clara e objetiva.",
+        "O conteúdo a seguir apresenta argumentos bem estruturados.",
+        "O tema é desenvolvido de maneira simples e eficiente."
+      ];
+      const v = variantes[Math.floor(Math.random() * variantes.length)];
+      let texto = "";
 
-      // IA simulada (exemplo)
-      let texto = `Documento gerado (IA simulada)\n\nTipo: ${tipo}\n\n${prompt}\n\n---\nEste é um exemplo de texto criado por uma IA.`;
-
+      if (tipo === "Redação") {
+        texto = `REDAÇÃO\n\nTema: ${prompt}\n\nIntrodução:\n${v}\n\nDesenvolvimento:\nDiscussão detalhada sobre o tema apresentado.\n\nConclusão:\nConsiderações finais sobre o assunto.`;
+      }
+      if (tipo === "Contrato simples") {
+        texto = `CONTRATO SIMPLES\n\nObjeto:\n${prompt}\n\nCláusula 1: As partes concordam com os termos.\nCláusula 2: Este contrato entra em vigor imediatamente.`;
+      }
+      if (tipo === "Currículo") {
+        texto = `CURRÍCULO\n\nNome: ____________________\nObjetivo:\n${prompt}\n\nExperiência:\n- Descrever experiências\n\nFormação:\n- Descrever formação acadêmica`;
+      }
+      if (tipo === "Trabalho escolar") {
+        texto = `TRABALHO ESCOLAR\n\nTema: ${prompt}\n\nIntrodução:\nApresentação do tema.\n\nDesenvolvimento:\nConteúdo principal.\n\nConclusão:\nResumo final.`;
+      }
       document.getElementById('resultado').innerText = texto;
     }
 
     function imprimirDocumento() {
       const conteudo = document.getElementById('resultado').innerHTML;
-      const janela = window.open('', '', 'width=800,height=600');
-      janela.document.write('<html><head><title>Imprimir</title></head><body>');
-      janela.document.write(conteudo);
-      janela.document.write('</body></html>');
-      janela.document.close();
-      janela.print();
+      const w = window.open('', '', 'width=800,height=600');
+      w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>');
+      w.document.close();
+      w.print();
     }
-  </script></body>
+
+    function salvarTXT() {
+      const texto = document.getElementById('resultado').innerText;
+      const blob = new Blob([texto], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'documento.txt';
+      a.click();
+    }
+
+    function salvarPDF() {
+      const texto = document.getElementById('resultado').innerText;
+      const w = window.open('', '', 'width=800,height=600');
+      w.document.write('<pre style="font-family:Arial">' + texto + '</pre>');w.document.close();
+  w.print();
+}
+
+  </script>
+</body>
 </html>
