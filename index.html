@@ -1,59 +1,23 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IA Criadora de Documentos Inteligente</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #4f46e5, #9333ea);
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    h1 { text-align: center; color: #4f46e5; }
-    textarea, select, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover { background: #3730a3; }
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-    #resultado {
-      margin-top: 20px;
-      padding: 20px;
-      border: 1px solid #ccc;
-      min-height: 200px;
-      white-space: pre-wrap;
-      background: #fafafa;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Criadora de Documentos Profissional</title>
+<style>
+  body {font-family: Arial, sans-serif; background: linear-gradient(135deg, #4f46e5, #9333ea); padding: 20px; color: #333;}
+  .container {max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);}
+  h1 {text-align: center; color: #4f46e5;}
+  textarea, select, button {width: 100%; margin-top: 10px; padding: 12px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;}
+  button {background: #4f46e5; color: #fff; border: none; cursor: pointer; font-weight: bold;}
+  button:hover {background: #3730a3;}
+  .buttons {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;}
+  #resultado {margin-top: 20px; padding: 20px; border: 1px solid #ccc; min-height: 250px; white-space: pre-wrap; background: #fafafa;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>IA Criadora de Documentos Inteligente</h1><label>Tipo de documento</label>
+<div class="container">
+<h1>IA Criadora de Documentos Profissional</h1>
+<label>Tipo de documento</label>
 <select id="tipo">
   <option>Redação</option>
   <option>Contrato simples</option>
@@ -61,82 +25,44 @@
   <option>Trabalho escolar</option>
   <option>Outro</option>
 </select>
-
 <label>Descreva o que você quer</label>
-<textarea id="prompt" placeholder="Ex: Faça um resumo sobre a Revolução Industrial"></textarea>
-
+<textarea id="prompt" placeholder="Ex: Faça uma redação detalhada sobre tecnologia na educação"></textarea>
 <div class="buttons">
-  <button onclick="gerarDocumento()">Gerar documento</button>
-  <button onclick="imprimirDocumento()">Imprimir</button>
-  <button onclick="salvarTXT()">Salvar TXT</button>
-  <button onclick="salvarPDF()">Salvar PDF</button>
+<button onclick="gerarDocumento()">Gerar documento</button>
+<button onclick="imprimirDocumento()">Imprimir</button>
+<button onclick="salvarTXT()">Salvar TXT</button>
+<button onclick="salvarPDF()">Salvar PDF</button>
 </div>
-
 <div id="resultado"></div>
+</div>
+<script>
+const pedidosFeitos = new Set();function gerarDocumento() { const tipo = document.getElementById('tipo').value; const prompt = document.getElementById('prompt').value.trim();
 
-  </div>  <script>
-    const pedidosFeitos = new Set();
+if (!prompt) { document.getElementById('resultado').innerText = '⚠️ Por favor, escreva um pedido válido.'; return; }
 
-    function gerarDocumento() {
-      const tipo = document.getElementById('tipo').value;
-      const prompt = document.getElementById('prompt').value.trim();
+if (pedidosFeitos.has(prompt.toLowerCase())) { document.getElementById('resultado').innerText = '⚠️ Você já pediu isso antes. Tente algo novo.'; return; }
 
-      if (pedidosFeitos.has(prompt.toLowerCase())) {
-        document.getElementById('resultado').innerText = "⚠️ Você já pediu isso antes. Tente algo novo.";
-        return;
-      }
+pedidosFeitos.add(prompt.toLowerCase());
 
-      pedidosFeitos.add(prompt.toLowerCase());
+// Função para criar parágrafos detalhados e variados const criarParagrafo = () => { const inicio = [O tema "${prompt}" é analisado minuciosamente, destacando seus aspectos mais importantes., Ao examinar "${prompt}", podemos perceber diversas implicações significativas para a sociedade., A análise de "${prompt}" revela pontos cruciais que merecem atenção detalhada.]; const meio = [Argumentos e exemplos enriquecem a compreensão do tema, mostrando sua relevância prática., Diversas perspectivas são apresentadas, permitindo uma visão abrangente sobre o assunto., Estudos e evidências são discutidos, reforçando a compreensão do tema de forma profunda.]; const fim = [Conclusão que sintetiza os pontos principais e apresenta uma reflexão crítica sobre o tema., Encerramento do documento com considerações finais que valorizam os aspectos discutidos., Resumo final que destaca a importância do tema e recomendações pertinentes.];
 
-      let texto = '';
+return inicio[Math.floor(Math.random() * inicio.length)] + ' ' +
+       meio[Math.floor(Math.random() * meio.length)] + ' ' +
+       fim[Math.floor(Math.random() * fim.length)];
 
-      switch(tipo) {
-        case 'Redação':
-          texto = `REDAÇÃO\n\nTema: ${prompt}\n\nIntrodução:\nEste texto aborda o tema de forma clara e objetiva, sem repetir pedidos anteriores.\n\nDesenvolvimento:\nArgumentos e explicações originais sobre o assunto.\n\nConclusão:\nResumo final das ideias principais.`;
-          break;
-        case 'Contrato simples':
-          texto = `CONTRATO SIMPLES\n\nObjeto:\n${prompt}\n\nCláusulas:\n1. As partes concordam com os termos de forma exclusiva e não repetida.\n2. Este contrato entra em vigor imediatamente.`;
-          break;
-        case 'Currículo':
-          texto = `CURRÍCULO\n\nNome: ____________________\nObjetivo:\n${prompt}\n\nExperiência:\n- Experiências detalhadas de forma única\n\nFormação:\n- Formação acadêmica de forma não repetida`;
-          break;
-        case 'Trabalho escolar':
-          texto = `TRABALHO ESCOLAR\n\nTema: ${prompt}\n\nIntrodução:\nApresentação original do tema.\n\nDesenvolvimento:\nConteúdo detalhado sem repetir pedidos anteriores.\n\nConclusão:\nResumo final exclusivo.`;
-          break;
-        case 'Outro':
-          texto = `DOCUMENTO PERSONALIZADO\n\nPedido: ${prompt}\n\nConteúdo:\nEste documento atende ao pedido de forma única, sem repetições.`;
-          break;
-        default:
-          texto = `Documento gerado com base no pedido: ${prompt}`;
-      }
+};
 
-      document.getElementById('resultado').innerText = texto;
-    }
+let texto = '';
 
-    function imprimirDocumento() {
-      const conteudo = document.getElementById('resultado').innerHTML;
-      const w = window.open('', '', 'width=800,height=600');
-      w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>');
-      w.document.close();
-      w.print();
-    }
+switch(tipo) { case 'Redação': case 'Trabalho escolar': case 'Outro': texto = DOCUMENTO\n\nTema/Pedido: ${prompt}\n\n; for(let i=0;i<5;i++) { // Gera 5 parágrafos longos texto += criarParagrafo() + '\n\n'; } break; case 'Contrato simples': texto = CONTRATO SIMPLES\n\nObjeto:\n${prompt}\n\nCláusulas:\n1. As partes concordam com os termos de forma exclusiva.\n2. Este contrato entra em vigor imediatamente.; break; case 'Currículo': texto = CURRÍCULO\n\nNome: ____________________\nObjetivo:\n${prompt}\n\nExperiência:\n- Experiências detalhadas e personalizadas para o objetivo.\n\nFormação:\n- Formação acadêmica relevante ao pedido.; break; default: texto = Documento gerado com base no pedido: ${prompt}; }
 
-    function salvarTXT() {
-      const texto = document.getElementById('resultado').innerText;
-      const blob = new Blob([texto], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'documento.txt';
-      a.click();
-    }
+document.getElementById('resultado').innerText = texto; }
 
-    function salvarPDF() {
-      const texto = document.getElementById('resultado').innerText;
-      const w = window.open('', '', 'width=800,height=600');
-      w.document.write('<pre style="font-family:Arial">' + texto + '</pre>');w.document.close();
-  w.print();
-}
+function imprimirDocumento() { const conteudo = document.getElementById('resultado').innerHTML; const w = window.open('', '', 'width=800,height=600'); w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>'); w.document.close(); w.print(); }
 
-  </script>
+function salvarTXT() { const texto = document.getElementById('resultado').innerText; const blob = new Blob([texto], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'documento.txt'; a.click(); }
+
+function salvarPDF() { const texto = document.getElementById('resultado').innerText; const w = window.open('', '', 'width=800,height=600'); w.document.write('<pre style="font-family:Arial">' + texto + '</pre>'); w.document.close(); w.print(); } </script>
+
 </body>
 </html>
