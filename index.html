@@ -12,7 +12,7 @@ textarea, select, button {width:100%; margin-top:10px; padding:12px; font-size:1
 button {background:#4f46e5; color:#fff; border:none; cursor:pointer; font-weight:bold;}
 button:hover {background:#3730a3;}
 .buttons {display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:10px; margin-top:10px;}
-#resultado {margin-top:20px; padding:20px; border:1px solid #ccc; min-height:250px; white-space:pre-wrap; background:#fafafa;}
+#resultado {margin-top:20px; padding:20px; border:1px solid #ccc; min-height:250px; background:#fafafa;}
 </style>
 </head>
 <body>
@@ -41,89 +41,89 @@ button:hover {background:#3730a3;}
 const pedidosFeitos = new Set();
 
 function gerarParagrafo(prompt) {
-  const inicios = [
-    `O tema "${prompt}" é analisado minuciosamente, destacando pontos importantes.`,
-    `Ao explorar "${prompt}", observamos diversas implicações significativas para a sociedade.`,
-    `A análise de "${prompt}" revela aspectos cruciais que merecem atenção detalhada.`
-  ];
-  const meios = [
-    `Argumentos e exemplos enriquecem a compreensão do tema, mostrando sua relevância prática.`,
-    `Diversas perspectivas são apresentadas, permitindo uma visão abrangente do assunto.`,
-    `Estudos e evidências são discutidos, reforçando a compreensão do tema de forma profunda.`
-  ];
-  const fins = [
-    `Conclusão que sintetiza os pontos principais e apresenta reflexão crítica sobre o tema.`,
-    `Encerramento do documento com considerações finais que valorizam os aspectos discutidos.`,
-    `Resumo final destacando a importância do tema e recomendações pertinentes.`
-  ];
-  return inicios[Math.floor(Math.random()*inicios.length)] + ' ' +
-         meios[Math.floor(Math.random()*meios.length)] + ' ' +
-         fins[Math.floor(Math.random()*fins.length)];
+    const inicios = [
+        `O tema "${prompt}" é analisado minuciosamente, destacando pontos importantes.`,
+        `Ao explorar "${prompt}", observamos diversas implicações significativas para a sociedade.`,
+        `A análise de "${prompt}" revela aspectos cruciais que merecem atenção detalhada.`
+    ];
+    const meios = [
+        `Argumentos e exemplos enriquecem a compreensão do tema, mostrando sua relevância prática.`,
+        `Diversas perspectivas são apresentadas, permitindo uma visão abrangente do assunto.`,
+        `Estudos e evidências são discutidos, reforçando a compreensão do tema de forma profunda.`
+    ];
+    const fins = [
+        `Conclusão que sintetiza os pontos principais e apresenta reflexão crítica sobre o tema.`,
+        `Encerramento do documento com considerações finais que valorizam os aspectos discutidos.`,
+        `Resumo final destacando a importância do tema e recomendações pertinentes.`
+    ];
+    return inicios[Math.floor(Math.random()*inicios.length)] + '<br>' +
+           meios[Math.floor(Math.random()*meios.length)] + '<br>' +
+           fins[Math.floor(Math.random()*fins.length)];
 }
 
 function gerarDocumento() {
-  const tipo = document.getElementById('tipo').value;
-  const prompt = document.getElementById('prompt').value.trim();
+    const tipo = document.getElementById('tipo').value;
+    const prompt = document.getElementById('prompt').value.trim();
 
-  if (!prompt) {
-    document.getElementById('resultado').innerText = '⚠️ Por favor, escreva um pedido válido.';
-    return;
-  }
+    if (!prompt) {
+        document.getElementById('resultado').innerHTML = '<span style="color:red">⚠️ Por favor, escreva um pedido válido.</span>';
+        return;
+    }
 
-  if (pedidosFeitos.has(prompt.toLowerCase())) {
-    document.getElementById('resultado').innerText = '⚠️ Você já pediu isso antes. Tente algo novo.';
-    return;
-  }
+    if (pedidosFeitos.has(prompt.toLowerCase())) {
+        document.getElementById('resultado').innerHTML = '<span style="color:red">⚠️ Você já pediu isso antes. Tente algo novo.</span>';
+        return;
+    }
 
-  pedidosFeitos.add(prompt.toLowerCase());
+    pedidosFeitos.add(prompt.toLowerCase());
 
-  let texto = '';
+    let texto = '';
 
-  switch(tipo) {
-    case 'Redação':
-    case 'Trabalho escolar':
-    case 'Outro':
-      texto = `DOCUMENTO\\n\\nTema/Pedido: ${prompt}\\n\\n`;
-      for(let i=0; i<5; i++) {
-        texto += gerarParagrafo(prompt) + '\\n\\n';
-      }
-      break;
-    case 'Contrato simples':
-      texto = `CONTRATO SIMPLES\\n\\nObjeto:\\n${prompt}\\n\\nCláusulas:\\n1. As partes concordam com os termos de forma exclusiva.\\n2. Este contrato entra em vigor imediatamente.`;
-      break;
-    case 'Currículo':
-      texto = `CURRÍCULO\\n\\nNome: ____________________\\nObjetivo:\\n${prompt}\\n\\nExperiência:\\n- Experiências detalhadas e personalizadas para o objetivo.\\n\\nFormação:\\n- Formação acadêmica relevante ao pedido.`;
-      break;
-    default:
-      texto = `Documento gerado com base no pedido: ${prompt}`;
-  }
+    switch(tipo) {
+        case 'Redação':
+        case 'Trabalho escolar':
+        case 'Outro':
+            texto = `<b>DOCUMENTO</b><br><br><b>Tema/Pedido:</b> ${prompt}<br><br>`; 
+            for(let i=0; i<5; i++) {
+                texto += gerarParagrafo(prompt) + '<br><br>';
+            }
+            break;
+        case 'Contrato simples':
+            texto = `<b>CONTRATO SIMPLES</b><br><br><b>Objeto:</b> ${prompt}<br><br><b>Cláusulas:</b><br>1. As partes concordam com os termos de forma exclusiva.<br>2. Este contrato entra em vigor imediatamente.`;
+            break;
+        case 'Currículo':
+            texto = `<b>CURRÍCULO</b><br><br><b>Nome:</b> ____________________<br><b>Objetivo:</b> ${prompt}<br><br><b>Experiência:</b><br>- Experiências detalhadas e personalizadas para o objetivo.<br><br><b>Formação:</b><br>- Formação acadêmica relevante ao pedido.`;
+            break;
+        default:
+            texto = `Documento gerado com base no pedido: ${prompt}`;
+    }
 
-  document.getElementById('resultado').innerText = texto;
+    document.getElementById('resultado').innerHTML = texto;
 }
 
 function imprimirDocumento() {
-  const conteudo = document.getElementById('resultado').innerHTML;
-  const w = window.open('', '', 'width=800,height=600');
-  w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>');
-  w.document.close();
-  w.print();
+    const conteudo = document.getElementById('resultado').innerHTML;
+    const w = window.open('', '', 'width=800,height=600');
+    w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>');
+    w.document.close();
+    w.print();
 }
 
 function salvarTXT() {
-  const texto = document.getElementById('resultado').innerText;
-  const blob = new Blob([texto], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'documento.txt';
-  a.click();
+    const texto = document.getElementById('resultado').innerText;
+    const blob = new Blob([texto], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'documento.txt';
+    a.click();
 }
 
 function salvarPDF() {
-  const texto = document.getElementById('resultado').innerText;
-  const w = window.open('', '', 'width=800,height=600');
-  w.document.write('<pre style="font-family:Arial">' + texto + '</pre>');
-  w.document.close();
-  w.print();
+    const texto = document.getElementById('resultado').innerText;
+    const w = window.open('', '', 'width=800,height=600');
+    w.document.write('<pre style="font-family:Arial">' + texto + '</pre>');
+    w.document.close();
+    w.print();
 }
 </script>
 </body>
