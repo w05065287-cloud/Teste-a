@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IA Criadora de Documentos</title>
+  <title>IA Criadora de Documentos Inteligente</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,16 +53,17 @@
 </head>
 <body>
   <div class="container">
-    <h1>IA Criadora de Documentos</h1><label>Tipo de documento</label>
+    <h1>IA Criadora de Documentos Inteligente</h1><label>Tipo de documento</label>
 <select id="tipo">
   <option>Redação</option>
   <option>Contrato simples</option>
   <option>Currículo</option>
   <option>Trabalho escolar</option>
+  <option>Outro</option>
 </select>
 
 <label>Descreva o que você quer</label>
-<textarea id="prompt" placeholder="Ex: Redação sobre tecnologia na educação"></textarea>
+<textarea id="prompt" placeholder="Ex: Faça um resumo sobre a Revolução Industrial"></textarea>
 
 <div class="buttons">
   <button onclick="gerarDocumento()">Gerar documento</button>
@@ -74,29 +75,41 @@
 <div id="resultado"></div>
 
   </div>  <script>
+    const pedidosFeitos = new Set();
+
     function gerarDocumento() {
       const tipo = document.getElementById('tipo').value;
-      const prompt = document.getElementById('prompt').value;
-      const variantes = [
-        "Este texto foi elaborado de forma clara e objetiva.",
-        "O conteúdo a seguir apresenta argumentos bem estruturados.",
-        "O tema é desenvolvido de maneira simples e eficiente."
-      ];
-      const v = variantes[Math.floor(Math.random() * variantes.length)];
-      let texto = "";
+      const prompt = document.getElementById('prompt').value.trim();
 
-      if (tipo === "Redação") {
-        texto = `REDAÇÃO\n\nTema: ${prompt}\n\nIntrodução:\n${v}\n\nDesenvolvimento:\nDiscussão detalhada sobre o tema apresentado.\n\nConclusão:\nConsiderações finais sobre o assunto.`;
+      if (pedidosFeitos.has(prompt.toLowerCase())) {
+        document.getElementById('resultado').innerText = "⚠️ Você já pediu isso antes. Tente algo novo.";
+        return;
       }
-      if (tipo === "Contrato simples") {
-        texto = `CONTRATO SIMPLES\n\nObjeto:\n${prompt}\n\nCláusula 1: As partes concordam com os termos.\nCláusula 2: Este contrato entra em vigor imediatamente.`;
+
+      pedidosFeitos.add(prompt.toLowerCase());
+
+      let texto = '';
+
+      switch(tipo) {
+        case 'Redação':
+          texto = `REDAÇÃO\n\nTema: ${prompt}\n\nIntrodução:\nEste texto aborda o tema de forma clara e objetiva, sem repetir pedidos anteriores.\n\nDesenvolvimento:\nArgumentos e explicações originais sobre o assunto.\n\nConclusão:\nResumo final das ideias principais.`;
+          break;
+        case 'Contrato simples':
+          texto = `CONTRATO SIMPLES\n\nObjeto:\n${prompt}\n\nCláusulas:\n1. As partes concordam com os termos de forma exclusiva e não repetida.\n2. Este contrato entra em vigor imediatamente.`;
+          break;
+        case 'Currículo':
+          texto = `CURRÍCULO\n\nNome: ____________________\nObjetivo:\n${prompt}\n\nExperiência:\n- Experiências detalhadas de forma única\n\nFormação:\n- Formação acadêmica de forma não repetida`;
+          break;
+        case 'Trabalho escolar':
+          texto = `TRABALHO ESCOLAR\n\nTema: ${prompt}\n\nIntrodução:\nApresentação original do tema.\n\nDesenvolvimento:\nConteúdo detalhado sem repetir pedidos anteriores.\n\nConclusão:\nResumo final exclusivo.`;
+          break;
+        case 'Outro':
+          texto = `DOCUMENTO PERSONALIZADO\n\nPedido: ${prompt}\n\nConteúdo:\nEste documento atende ao pedido de forma única, sem repetições.`;
+          break;
+        default:
+          texto = `Documento gerado com base no pedido: ${prompt}`;
       }
-      if (tipo === "Currículo") {
-        texto = `CURRÍCULO\n\nNome: ____________________\nObjetivo:\n${prompt}\n\nExperiência:\n- Descrever experiências\n\nFormação:\n- Descrever formação acadêmica`;
-      }
-      if (tipo === "Trabalho escolar") {
-        texto = `TRABALHO ESCOLAR\n\nTema: ${prompt}\n\nIntrodução:\nApresentação do tema.\n\nDesenvolvimento:\nConteúdo principal.\n\nConclusão:\nResumo final.`;
-      }
+
       document.getElementById('resultado').innerText = texto;
     }
 
