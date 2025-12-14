@@ -1,225 +1,268 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>IA de Redações</title>
+<title>Plataforma Educacional de Redações</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
-*{box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#4f46e5,#9333ea);margin:0;padding:20px}
-.card{max-width:1100px;margin:auto;background:#fff;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.15);overflow:hidden}
-.header{background:linear-gradient(135deg,#1e3a8a,#6d28d9);color:#fff;padding:25px;text-align:center}
-.content{padding:25px}
-h1,h2{text-align:center}
-label{font-weight:500;margin-top:15px;display:block}
-input,textarea,select{width:100%;padding:14px;margin-top:6px;border-radius:10px;border:1px solid #ddd;font-size:15px}
-textarea{min-height:90px}
-.buttons{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-button{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
-.btn-main{background:#4f46e5;color:#fff}
-.btn-main:hover{background:#4338ca}
-.btn-alt{background:#e5e7eb}
-.btn-alt:hover{background:#d1d5db}
-.result{margin-top:25px;background:#f9fafb;border-radius:12px;padding:20px;white-space:pre-wrap;line-height:1.7}
+:root{--cor:#4f46e5}
+body{
+  margin:0;font-family:Inter,sans-serif;
+  background:linear-gradient(135deg,#1e1b4b,#6d28d9);
+  padding:20px
+}
 .hidden{display:none}
-.list{background:#f3f4f6;border-radius:12px;padding:15px;margin-top:20px}
-.item{padding:10px;border-bottom:1px solid #ddd;cursor:pointer}
-.item:hover{background:#e5e7eb}
-.footer{text-align:center;font-size:13px;color:#555;padding:15px}
-@media(max-width:700px){.buttons{flex-direction:column}}
+.card{
+  max-width:1200px;margin:auto;background:#fff;
+  border-radius:20px;box-shadow:0 30px 60px rgba(0,0,0,.25)
+}
+.header{padding:25px;background:var(--cor);color:#fff}
+.main{display:grid;grid-template-columns:300px 1fr}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+.sidebar{background:#f9fafb;padding:20px;border-right:1px solid #e5e7eb}
+.section{
+  background:#fff;padding:15px;border-radius:14px;
+  margin-bottom:20px;box-shadow:0 8px 18px rgba(0,0,0,.08)
+}
+.item{padding:10px;border-radius:10px;cursor:pointer}
+.item:hover{background:#eef2ff}
+.content{padding:30px}
+label{font-weight:600;display:block;margin-top:15px}
+textarea,input,select{
+  width:100%;padding:14px;border-radius:12px;
+  border:1px solid #ddd;margin-top:6px
+}
+textarea{min-height:120px}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+button{
+  border:none;border-radius:14px;padding:14px 20px;
+  font-weight:600;cursor:pointer
+}
+.primary{background:var(--cor);color:#fff}
+.sec{background:#e5e7eb}
+.result{
+  margin-top:25px;background:#f8fafc;padding:25px;
+  border-radius:16px;white-space:pre-wrap;line-height:1.7
+}
+.box{
+  margin-top:20px;padding:20px;border-radius:16px;
+  background:#eef2ff;border-left:6px solid var(--cor)
+}
+.alert{
+  margin-top:15px;padding:15px;border-radius:12px;
+  background:#fee2e2;color:#991b1b
+}
+.login{
+  max-width:420px;margin:60px auto;background:#fff;
+  border-radius:20px;box-shadow:0 30px 60px rgba(0,0,0,.3)
+}
+.login .header{text-align:center}
+.timer{font-weight:700;font-size:18px}
+.footer{text-align:center;font-size:13px;padding:15px;color:#666}
 </style>
 </head>
-<body><!-- LOGIN --><div class="card" id="loginCard">
-  <div class="header"><h1>Login</h1></div>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="header">
+    <h1>IA Educacional</h1>
+    <p>Login personalizado</p>
+  </div>
   <div class="content">
+    <label>Nome</label>
+    <input id="nome">
+
     <label>Usuário</label>
     <input id="user">
+
     <label>Senha</label>
     <input id="pass" type="password">
+
+    <label>Tipo</label>
+    <select id="tipo">
+      <option>Aluno</option>
+      <option>Professor</option>
+    </select>
+
     <div class="buttons">
-      <button class="btn-main" onclick="login()">Entrar</button>
+      <button class="primary" onclick="registrar()">Criar conta</button>
+      <button class="sec" onclick="entrar()">Entrar</button>
     </div>
   </div>
-</div><!-- APP --><div class="card hidden" id="app">
-  <div class="header">
-    <h1>IA de Redações</h1>
-    <p id="modoTxt"></p>
-  </div>  <div class="content"><label>Nível</label>
-<select id="nivel">
-  <option>Fundamental</option>
-  <option>Ensino Médio</option>
-  <option>ENEM (sem proposta)</option>
-</select>
-
-<label>Tema (ou escolha do banco)</label>
-<textarea id="tema"></textarea>
-
-<div class="buttons">
-  <button class="btn-main" onclick="gerar()">✍️ Gerar</button>
-  <button class="btn-alt" onclick="salvar()">💾 Salvar</button>
-  <button class="btn-alt" onclick="imprimir()">🖨️ Imprimir</button>
-  <button class="btn-alt" onclick="pdf()">📄 PDF</button>
 </div>
 
-<div id="resultado" class="result"></div>
+<!-- APP -->
+<div class="card hidden" id="app">
+  <div class="header">
+    <h1>Plataforma de Redações</h1>
+    <p id="modoTxt"></p>
+  </div>
 
-<h2>📚 Banco de Temas</h2>
-<div id="banco" class="list"></div>
+  <div class="main">
+    <div class="sidebar">
+      <div class="section">
+        <h3>📌 Modos</h3>
+        <div class="item" onclick="modoNormal()">✍️ Produção</div>
+        <div class="item" onclick="modoProva()">📝 Prova</div>
+        <div class="item" onclick="mostrarRanking()">🏆 Ranking</div>
+      </div>
+    </div>
 
-<h2>🗂️ Redações Salvas</h2>
-<div id="salvos" class="list"></div>
+    <div class="content">
+      <div id="cronometro" class="timer hidden"></div>
 
-  </div>  <div class="footer">Sistema Educacional Offline</div>
-</div><script>
-let modo="",textoFinal="";
+      <label>Tema</label>
+      <textarea id="tema"></textarea>
 
-const temasPadrao=[
-  "O impacto da tecnologia na educação",
-  "Os desafios do meio ambiente na atualidade",
-  "A importância da leitura na formação do indivíduo",
-  "O uso das redes sociais pelos jovens",
-  "Desigualdade social no Brasil",
-  "Bullying no ambiente escolar",
-  "A influência da mídia na sociedade"
-];
+      <label>Texto do aluno</label>
+      <textarea id="textoAluno"></textarea>
 
-function login(){
-  const u=user.value,p=pass.value;
-  if(u==="aluno"&&p==="123") modo="aluno";
-  else if(u==="professor"&&p==="123") modo="professor";
-  else return alert("Login inválido");
+      <div class="buttons">
+        <button class="primary" onclick="gerar()">Gerar</button>
+        <button class="primary hidden" id="finalizar" onclick="finalizarProva()">Finalizar Prova</button>
+        <button class="sec" onclick="corrigir()">Corrigir</button>
+        <button class="sec" onclick="pdf()">PDF</button>
+      </div>
 
-  loginCard.classList.add("hidden");
+      <div id="resultado" class="result"></div>
+      <div id="repeticao" class="alert hidden"></div>
+      <div id="avaliacao" class="box hidden"></div>
+    </div>
+  </div>
+
+  <div class="footer">Plataforma Educacional • Offline</div>
+</div>
+
+<script>
+let usuarioAtual=null,modo="",tempo,seg=0,notaAtual=0;
+
+/* LOGIN */
+function getUsuarios(){
+  return JSON.parse(localStorage.getItem("usuarios")||"[]");
+}
+function salvarUsuarios(u){
+  localStorage.setItem("usuarios",JSON.stringify(u));
+}
+function registrar(){
+  if(!nome.value||!user.value||!pass.value) return alert("Preencha tudo");
+  const u=getUsuarios();
+  if(u.find(x=>x.usuario===user.value)) return alert("Usuário existe");
+  u.push({nome:nome.value,usuario:user.value,senha:pass.value,tipo:tipo.value});
+  salvarUsuarios(u);
+  alert("Conta criada!");
+}
+function entrar(){
+  const u=getUsuarios().find(x=>x.usuario===user.value&&x.senha===pass.value);
+  if(!u) return alert("Login inválido");
+  usuarioAtual=u;
+  modo=u.tipo;
+  login.classList.add("hidden");
   app.classList.remove("hidden");
-  modoTxt.innerText=modo==="aluno"?"Modo Aluno":"Modo Professor";
-
-  carregarBanco();
-  carregarSalvos();
+  modoTxt.innerText=`${modo} — ${u.nome}`;
 }
 
-function r(a){return a[Math.floor(Math.random()*a.length)]}
-function limpar(t){
-  const p=t.split(" "),s=new Set();
-  return p.filter(w=>{let k=w.toLowerCase();if(s.has(k)&&k.length>4)return false;s.add(k);return true}).join(" ");
+/* MODOS */
+function modoNormal(){
+  clearInterval(tempo);
+  cronometro.classList.add("hidden");
+  finalizar.classList.add("hidden");
+  tema.disabled=false;
+}
+function modoProva(){
+  tema.value="A importância da educação na sociedade";
+  tema.disabled=true;
+  textoAluno.value="";
+  seg=0;
+  cronometro.classList.remove("hidden");
+  finalizar.classList.remove("hidden");
+  tempo=setInterval(()=>{
+    seg++;
+    cronometro.innerText=`Tempo: ${Math.floor(seg/60)}m ${seg%60}s`;
+  },1000);
+}
+function finalizarProva(){
+  clearInterval(tempo);
+  resultado.innerText="Prova finalizada.\n\n"+textoAluno.value;
 }
 
-function intro(t){return limpar(r([
-  `Na sociedade atual, ${t.toLowerCase()} tornou-se um tema relevante.`,
-  `Diante do cenário contemporâneo, discutir ${t.toLowerCase()} é essencial.`,
-  `Nos últimos anos, ${t.toLowerCase()} ganhou destaque social.`
-])+" "+r([
-  `Esse assunto merece reflexão crítica.`,
-  `Tal debate impacta diretamente a coletividade.`,
-  `Essa questão envolve fatores sociais importantes.`
-]))}
-
-function dev(t){return limpar(r([
-  `Sob essa perspectiva, ${t.toLowerCase()} apresenta consequências significativas.`,
-  `Além disso, ${t.toLowerCase()} influencia o comportamento social.`,
-  `Nesse contexto, observa-se que ${t.toLowerCase()} afeta a sociedade.`
-])+" "+r([
-  `Isso ocorre devido a fatores históricos e culturais.`,
-  `A falta de conscientização agrava esse cenário.`,
-  `Aspectos sociais contribuem para esse problema.`
-])+" "+r([
-  `Assim, compreender essa realidade é fundamental.`,
-  `Portanto, o debate torna-se necessário.`,
-  `Dessa forma, é preciso refletir criticamente.`
-]))}
-
-function concl(t){return limpar(r([
-  `Em síntese, ${t.toLowerCase()} possui grande relevância social.`,
-  `Portanto, torna-se evidente a importância desse tema.`,
-  `Diante disso, é fundamental refletir sobre essa questão.`
-])+" "+r([
-  `A conscientização contribui para avanços positivos.`,
-  `O pensamento crítico favorece melhorias coletivas.`,
-  `O debate responsável promove desenvolvimento social.`
-]))}
-
+/* GERAÇÃO */
 function gerar(){
-  const t=tema.value.trim();
-  if(!t)return alert("Digite ou escolha um tema");
-
-  textoFinal=
-`REDAÇÃO
-
-Tema: ${t}
-
-Introdução:
-${intro(t)}
+resultado.innerText=
+`Introdução:
+Atualmente, ${tema.value.toLowerCase()} é um tema relevante.
 
 Desenvolvimento:
-${dev(t)}
-
-${dev(t)}
+Esse assunto gera impactos importantes na sociedade.
 
 Conclusão:
-${concl(t)}
+Portanto, refletir sobre o tema é essencial.`;
+}
 
-Nota simulada: ${Math.floor(700+Math.random()*300)}
-`;
+/* CORREÇÃO */
+function corrigir(){
+  if(modo!=="Professor") return alert("Apenas professor");
+  const txt=textoAluno.value;
+  if(!txt) return;
+  const palavras=txt.split(/\s+/).length;
+  notaAtual=Math.min(1000,600+Math.floor(palavras/4));
+  detectarRepeticao(txt);
+  avaliacao.classList.remove("hidden");
+  avaliacao.innerText=
+`CORREÇÃO
 
-  if(modo==="professor"){
-    textoFinal+=`
---------------------
-AVALIAÇÃO DO PROFESSOR
+Palavras: ${palavras}
+Ortografia: ${palavras>120?8:6}/10
+Coesão: ${palavras>150?8:6}/10
+Argumentação: ${palavras>180?8:7}/10
 
-Clareza: ${Math.floor(7+Math.random()*3)}/10
-Coesão: ${Math.floor(7+Math.random()*3)}/10
-Argumentação: ${Math.floor(6+Math.random()*4)}/10
-Linguagem: ${Math.floor(7+Math.random()*3)}/10
-Estrutura: ${Math.floor(7+Math.random()*3)}/10
+NOTA: ${notaAtual}
 
 Comentário:
-Texto bem organizado e coerente. Pode melhorar com exemplos mais específicos.
-`;
-  }
-
-  resultado.innerText=textoFinal;
+Texto adequado, pode aprofundar argumentos.`;
+  salvarRanking();
 }
 
-// SALVAR REDAÇÃO
-function salvar(){
-  if(!textoFinal)return alert("Gere uma redação primeiro");
-  const lista=JSON.parse(localStorage.getItem("redacoes")||"[]");
-  lista.push(textoFinal);
-  localStorage.setItem("redacoes",JSON.stringify(lista));
-  carregarSalvos();
-  alert("Redação salva!");
-}
-
-function carregarSalvos(){
-  const div=document.getElementById("salvos");
-  div.innerHTML="";
-  const lista=JSON.parse(localStorage.getItem("redacoes")||"[]");
-  lista.forEach((r,i)=>{
-    const d=document.createElement("div");
-    d.className="item";
-    d.innerText=`Redação ${i+1}`;
-    d.onclick=()=>{resultado.innerText=r;textoFinal=r};
-    div.appendChild(d);
+/* REPETIÇÃO */
+function detectarRepeticao(txt){
+  const frases=txt.split(".");
+  const set=new Set(); let r=0;
+  frases.forEach(f=>{
+    let s=f.trim().toLowerCase();
+    if(set.has(s)&&s.length>10) r++;
+    set.add(s);
   });
+  if(r>0){
+    repeticao.classList.remove("hidden");
+    repeticao.innerText="⚠ Repetição detectada";
+  }else repeticao.classList.add("hidden");
 }
 
-// BANCO DE TEMAS
-function carregarBanco(){
-  const div=document.getElementById("banco");
-  temasPadrao.forEach(t=>{
-    const d=document.createElement("div");
-    d.className="item";
-    d.innerText=t;
-    d.onclick=()=>tema.value=t;
-    div.appendChild(d);
-  });
+/* RANKING */
+function salvarRanking(){
+  const r=JSON.parse(localStorage.getItem("ranking")||"[]");
+  r.push({nome:usuarioAtual.nome,nota:notaAtual});
+  localStorage.setItem("ranking",JSON.stringify(r));
+}
+function mostrarRanking(){
+  const r=JSON.parse(localStorage.getItem("ranking")||"[]")
+    .sort((a,b)=>b.nota-a.nota);
+  resultado.innerText="🏆 RANKING\n\n"+
+    r.map((x,i)=>`${i+1}. ${x.nome} – ${x.nota}`).join("\n");
 }
 
-function imprimir(){
-  if(!textoFinal)return;
-  let w=window.open("");w.document.write("<pre>"+textoFinal+"</pre>");w.print();}
-
-function pdf(){ if(!textoFinal)return; const {jsPDF}=window.jspdf; const d=new jsPDF(); d.text(d.splitTextToSize(textoFinal,180),10,20); d.save("Redacao.pdf"); } </script>
+/* PDF */
+function pdf(){
+  const{jsPDF}=window.jspdf;
+  const d=new jsPDF();
+  d.text(d.splitTextToSize(resultado.innerText+"\n\n"+avaliacao.innerText,180),10,20);
+  d.save("Redacao.pdf");
+}
+</script>
 
 </body>
-</html>
+  </html>
