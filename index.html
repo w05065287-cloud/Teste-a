@@ -2,128 +2,215 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA Criadora de Documentos Profissional</title>
+<title>IA de Redações – Aluno & Professor</title>
+
 <style>
-body {font-family: Arial, sans-serif; background: linear-gradient(135deg,#4f46e5,#9333ea); padding: 20px; color: #333;}
-.container {max-width:900px; margin:auto; background:#fff; padding:25px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.2);}
-h1 {text-align:center; color:#4f46e5;}
-textarea, select, button {width:100%; margin-top:10px; padding:12px; font-size:16px; border-radius:6px; border:1px solid #ccc;}
-button {background:#4f46e5; color:#fff; border:none; cursor:pointer; font-weight:bold;}
-button:hover {background:#3730a3;}
-.buttons {display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:10px; margin-top:10px;}
-#resultado {margin-top:20px; padding:20px; border:1px solid #ccc; min-height:250px; background:#fafafa;}
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  padding: 20px;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+}
+h1 { text-align: center; color: #1d4ed8; }
+textarea, select, button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  font-size: 16px;
+}
+button {
+  background: #1d4ed8;
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:hover { background: #1e40af; }
+#resultado {
+  margin-top: 20px;
+  background: #f9fafb;
+  padding: 20px;
+  white-space: pre-wrap;
+  border-radius: 8px;
+}
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
 <div class="container">
-<h1>IA Criadora de Documentos Profissional</h1>
-<label>Tipo de documento</label>
-<select id="tipo">
-  <option>Redação</option>
-  <option>Contrato simples</option>
-  <option>Currículo</option>
-  <option>Trabalho escolar</option>
-  <option>Outro</option>
+
+<h1>IA de Redações</h1>
+
+<label>Modo</label>
+<select id="modo">
+  <option value="aluno">Aluno</option>
+  <option value="professor">Professor</option>
 </select>
-<label>Descreva o que você quer</label>
-<textarea id="prompt" placeholder="Ex: Faça uma redação detalhada sobre tecnologia na educação"></textarea>
-<div class="buttons">
-<button onclick="gerarDocumento()">Gerar documento</button>
-<button onclick="imprimirDocumento()">Imprimir</button>
-<button onclick="salvarTXT()">Salvar TXT</button>
-<button onclick="salvarPDF()">Salvar PDF</button>
-</div>
+
+<label>Tema</label>
+<textarea id="tema" placeholder="Ex: O impacto da tecnologia na educação"></textarea>
+
+<label>Nível</label>
+<select id="nivel">
+  <option value="fundamental">Fundamental</option>
+  <option value="medio">Ensino Médio</option>
+  <option value="enem">ENEM (sem proposta)</option>
+</select>
+
+<button onclick="gerarRedacao()">Gerar</button>
+<button onclick="imprimir()">Imprimir</button>
+<button onclick="gerarPDF()">Baixar PDF</button>
+
 <div id="resultado"></div>
+
 </div>
 
 <script>
-const pedidosFeitos = new Set();
+let textoFinal = "";
 
-function gerarParagrafo(prompt) {
-    const inicios = [
-        `O tema "${prompt}" é analisado minuciosamente, destacando pontos importantes.`,
-        `Ao explorar "${prompt}", observamos diversas implicações significativas para a sociedade.`,
-        `A análise de "${prompt}" revela aspectos cruciais que merecem atenção detalhada.`
-    ];
-    const meios = [
-        `Argumentos e exemplos enriquecem a compreensão do tema, mostrando sua relevância prática.`,
-        `Diversas perspectivas são apresentadas, permitindo uma visão abrangente do assunto.`,
-        `Estudos e evidências são discutidos, reforçando a compreensão do tema de forma profunda.`
-    ];
-    const fins = [
-        `Conclusão que sintetiza os pontos principais e apresenta reflexão crítica sobre o tema.`,
-        `Encerramento do documento com considerações finais que valorizam os aspectos discutidos.`,
-        `Resumo final destacando a importância do tema e recomendações pertinentes.`
-    ];
-    return inicios[Math.floor(Math.random()*inicios.length)] + '<br>' +
-           meios[Math.floor(Math.random()*meios.length)] + '<br>' +
-           fins[Math.floor(Math.random()*fins.length)];
+function escolher(lista){ return lista[Math.floor(Math.random()*lista.length)]; }
+
+function evitarRepeticao(texto){
+  const palavras = texto.split(" ");
+  const usadas = new Set();
+  return palavras.filter(p=>{
+    const w=p.toLowerCase();
+    if(usadas.has(w)&&w.length>4) return false;
+    usadas.add(w); return true;
+  }).join(" ");
 }
 
-function gerarDocumento() {
-    const tipo = document.getElementById('tipo').value;
-    const prompt = document.getElementById('prompt').value.trim();
-
-    if (!prompt) {
-        document.getElementById('resultado').innerHTML = '<span style="color:red">⚠️ Por favor, escreva um pedido válido.</span>';
-        return;
-    }
-
-    if (pedidosFeitos.has(prompt.toLowerCase())) {
-        document.getElementById('resultado').innerHTML = '<span style="color:red">⚠️ Você já pediu isso antes. Tente algo novo.</span>';
-        return;
-    }
-
-    pedidosFeitos.add(prompt.toLowerCase());
-
-    let texto = '';
-
-    switch(tipo) {
-        case 'Redação':
-        case 'Trabalho escolar':
-        case 'Outro':
-            texto = `<b>DOCUMENTO</b><br><br><b>Tema/Pedido:</b> ${prompt}<br><br>`; 
-            for(let i=0; i<5; i++) {
-                texto += gerarParagrafo(prompt) + '<br><br>';
-            }
-            break;
-        case 'Contrato simples':
-            texto = `<b>CONTRATO SIMPLES</b><br><br><b>Objeto:</b> ${prompt}<br><br><b>Cláusulas:</b><br>1. As partes concordam com os termos de forma exclusiva.<br>2. Este contrato entra em vigor imediatamente.`;
-            break;
-        case 'Currículo':
-            texto = `<b>CURRÍCULO</b><br><br><b>Nome:</b> ____________________<br><b>Objetivo:</b> ${prompt}<br><br><b>Experiência:</b><br>- Experiências detalhadas e personalizadas para o objetivo.<br><br><b>Formação:</b><br>- Formação acadêmica relevante ao pedido.`;
-            break;
-        default:
-            texto = `Documento gerado com base no pedido: ${prompt}`;
-    }
-
-    document.getElementById('resultado').innerHTML = texto;
+function introducao(tema){
+  return evitarRepeticao(
+    escolher([
+      `Na sociedade atual, ${tema.toLowerCase()} é um assunto relevante.`,
+      `Atualmente, discute-se cada vez mais sobre ${tema.toLowerCase()}.`,
+      `Nos últimos anos, ${tema.toLowerCase()} ganhou destaque social.`
+    ]) +
+    " " +
+    escolher([
+      `Esse tema merece reflexão.`,
+      `Esse assunto afeta a sociedade.`,
+      `Dessa forma, torna-se importante analisá-lo.`
+    ])
+  );
 }
 
-function imprimirDocumento() {
-    const conteudo = document.getElementById('resultado').innerHTML;
-    const w = window.open('', '', 'width=800,height=600');
-    w.document.write('<html><body style="font-family:Arial">' + conteudo + '</body></html>');
-    w.document.close();
-    w.print();
+function desenvolvimento(tema){
+  return evitarRepeticao(
+    escolher([
+      `Primeiramente, ${tema.toLowerCase()} influencia o cotidiano.`,
+      `Além disso, ${tema.toLowerCase()} gera impactos sociais.`,
+      `Outro ponto relevante é que ${tema.toLowerCase()} afeta a coletividade.`
+    ]) +
+    " " +
+    escolher([
+      `Isso ocorre por fatores sociais.`,
+      `Tal situação é agravada pela falta de conscientização.`,
+      `Esses fatores contribuem para o problema.`
+    ]) +
+    " " +
+    escolher([
+      `Assim, compreender essa questão é essencial.`,
+      `Portanto, o debate se torna necessário.`,
+      `Dessa maneira, a reflexão é indispensável.`
+    ])
+  );
 }
 
-function salvarTXT() {
-    const texto = document.getElementById('resultado').innerText;
-    const blob = new Blob([texto], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'documento.txt';
-    a.click();
+function conclusao(tema){
+  return evitarRepeticao(
+    escolher([
+      `Portanto, ${tema.toLowerCase()} exige atenção da sociedade.`,
+      `Diante disso, percebe-se a importância de discutir ${tema.toLowerCase()}.`,
+      `Assim, torna-se evidente a relevância desse tema.`
+    ]) +
+    " " +
+    escolher([
+      `O debate consciente contribui para avanços sociais.`,
+      `Refletir sobre esse assunto é fundamental.`,
+      `A análise crítica favorece melhorias coletivas.`
+    ])
+  );
 }
 
-function salvarPDF() {
-    const texto = document.getElementById('resultado').innerText;
-    const w = window.open('', '', 'width=800,height=600');
-    w.document.write('<pre style="font-family:Arial">' + texto + '</pre>');
-    w.document.close();
-    w.print();
+function notaSimulada(){ return Math.floor(700+Math.random()*300); }
+
+function avaliacaoProfessor(){
+  return `
+AVALIAÇÃO DO PROFESSOR
+
+Clareza: ${Math.floor(7+Math.random()*3)}/10
+Coesão: ${Math.floor(7+Math.random()*3)}/10
+Argumentação: ${Math.floor(6+Math.random()*4)}/10
+Linguagem: ${Math.floor(7+Math.random()*3)}/10
+Estrutura: ${Math.floor(7+Math.random()*3)}/10
+
+Comentário:
+O texto apresenta boa organização, ideias claras e desenvolvimento adequado ao tema. 
+Pode melhorar com exemplos mais específicos e aprofundamento argumentativo.
+`;
+}
+
+function gerarRedacao(){
+  const tema=document.getElementById("tema").value.trim();
+  const modo=document.getElementById("modo").value;
+  const nivel=document.getElementById("nivel").value;
+  if(!tema){resultado.innerText="Digite um tema.";return;}
+
+  let intro=introducao(tema);
+  let dev1=desenvolvimento(tema);
+  let dev2=desenvolvimento(tema);
+  let concl=conclusao(tema);
+
+  textoFinal =
+`REDAÇÃO – ${nivel.toUpperCase()}
+
+Tema: ${tema}
+
+Introdução:
+${intro}
+
+Desenvolvimento:
+${dev1}
+
+${dev2}
+
+Conclusão:
+${concl}
+
+Nota simulada: ${notaSimulada()}
+`;
+
+  if(modo==="professor"){
+    textoFinal += "\n" + avaliacaoProfessor();
+  }
+
+  resultado.innerText=textoFinal;
+}
+
+function imprimir(){
+  if(!textoFinal)return alert("Gere primeiro.");
+  let w=window.open("");
+  w.document.write("<pre>"+textoFinal+"</pre>");
+  w.print();
+}
+
+function gerarPDF(){
+  if(!textoFinal)return alert("Gere primeiro.");
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const linhas=doc.splitTextToSize(textoFinal,180);
+  doc.text(linhas,10,20);
+  doc.save("Redacao.pdf");
 }
 </script>
 </body>
