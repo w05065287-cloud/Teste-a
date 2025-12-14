@@ -1,151 +1,169 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>IA de Redações – Aluno & Professor</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#2563eb,#7c3aed);
-  padding: 20px;
-}
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 12px;
-}
-h1 { text-align: center; color: #1d4ed8; }
-textarea, select, button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  font-size: 16px;
-}
-button {
-  background: #1d4ed8;
-  color: #fff;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-}
-button:hover { background: #1e40af; }
-#resultado {
-  margin-top: 20px;
-  background: #f9fafb;
-  padding: 20px;
-  white-space: pre-wrap;
-  border-radius: 8px;
-}
-</style>
-
+<title>IA de Redações</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#4f46e5,#9333ea);margin:0;padding:20px}
+.card{max-width:1100px;margin:auto;background:#fff;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.15);overflow:hidden}
+.header{background:linear-gradient(135deg,#1e3a8a,#6d28d9);color:#fff;padding:25px;text-align:center}
+.content{padding:25px}
+h1,h2{text-align:center}
+label{font-weight:500;margin-top:15px;display:block}
+input,textarea,select{width:100%;padding:14px;margin-top:6px;border-radius:10px;border:1px solid #ddd;font-size:15px}
+textarea{min-height:90px}
+.buttons{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+button{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-main{background:#4f46e5;color:#fff}
+.btn-main:hover{background:#4338ca}
+.btn-alt{background:#e5e7eb}
+.btn-alt:hover{background:#d1d5db}
+.result{margin-top:25px;background:#f9fafb;border-radius:12px;padding:20px;white-space:pre-wrap;line-height:1.7}
+.hidden{display:none}
+.list{background:#f3f4f6;border-radius:12px;padding:15px;margin-top:20px}
+.item{padding:10px;border-bottom:1px solid #ddd;cursor:pointer}
+.item:hover{background:#e5e7eb}
+.footer{text-align:center;font-size:13px;color:#555;padding:15px}
+@media(max-width:700px){.buttons{flex-direction:column}}
+</style>
 </head>
-
-<body>
-<div class="container">
-
-<h1>IA de Redações</h1>
-
-<label>Modo</label>
-<select id="modo">
-  <option value="aluno">Aluno</option>
-  <option value="professor">Professor</option>
-</select>
-
-<label>Tema</label>
-<textarea id="tema" placeholder="Ex: O impacto da tecnologia na educação"></textarea>
-
-<label>Nível</label>
+<body><!-- LOGIN --><div class="card" id="loginCard">
+  <div class="header"><h1>Login</h1></div>
+  <div class="content">
+    <label>Usuário</label>
+    <input id="user">
+    <label>Senha</label>
+    <input id="pass" type="password">
+    <div class="buttons">
+      <button class="btn-main" onclick="login()">Entrar</button>
+    </div>
+  </div>
+</div><!-- APP --><div class="card hidden" id="app">
+  <div class="header">
+    <h1>IA de Redações</h1>
+    <p id="modoTxt"></p>
+  </div>  <div class="content"><label>Nível</label>
 <select id="nivel">
-  <option value="fundamental">Fundamental</option>
-  <option value="medio">Ensino Médio</option>
-  <option value="enem">ENEM (sem proposta)</option>
+  <option>Fundamental</option>
+  <option>Ensino Médio</option>
+  <option>ENEM (sem proposta)</option>
 </select>
 
-<button onclick="gerarRedacao()">Gerar</button>
-<button onclick="imprimir()">Imprimir</button>
-<button onclick="gerarPDF()">Baixar PDF</button>
+<label>Tema (ou escolha do banco)</label>
+<textarea id="tema"></textarea>
 
-<div id="resultado"></div>
-
+<div class="buttons">
+  <button class="btn-main" onclick="gerar()">✍️ Gerar</button>
+  <button class="btn-alt" onclick="salvar()">💾 Salvar</button>
+  <button class="btn-alt" onclick="imprimir()">🖨️ Imprimir</button>
+  <button class="btn-alt" onclick="pdf()">📄 PDF</button>
 </div>
 
-<script>
-let textoFinal = "";
+<div id="resultado" class="result"></div>
 
-function escolher(lista){ return lista[Math.floor(Math.random()*lista.length)]; }
+<h2>📚 Banco de Temas</h2>
+<div id="banco" class="list"></div>
 
-function evitarRepeticao(texto){
-  const palavras = texto.split(" ");
-  const usadas = new Set();
-  return palavras.filter(p=>{
-    const w=p.toLowerCase();
-    if(usadas.has(w)&&w.length>4) return false;
-    usadas.add(w); return true;
-  }).join(" ");
+<h2>🗂️ Redações Salvas</h2>
+<div id="salvos" class="list"></div>
+
+  </div>  <div class="footer">Sistema Educacional Offline</div>
+</div><script>
+let modo="",textoFinal="";
+
+const temasPadrao=[
+  "O impacto da tecnologia na educação",
+  "Os desafios do meio ambiente na atualidade",
+  "A importância da leitura na formação do indivíduo",
+  "O uso das redes sociais pelos jovens",
+  "Desigualdade social no Brasil",
+  "Bullying no ambiente escolar",
+  "A influência da mídia na sociedade"
+];
+
+function login(){
+  const u=user.value,p=pass.value;
+  if(u==="aluno"&&p==="123") modo="aluno";
+  else if(u==="professor"&&p==="123") modo="professor";
+  else return alert("Login inválido");
+
+  loginCard.classList.add("hidden");
+  app.classList.remove("hidden");
+  modoTxt.innerText=modo==="aluno"?"Modo Aluno":"Modo Professor";
+
+  carregarBanco();
+  carregarSalvos();
 }
 
-function introducao(tema){
-  return evitarRepeticao(
-    escolher([
-      `Na sociedade atual, ${tema.toLowerCase()} é um assunto relevante.`,
-      `Atualmente, discute-se cada vez mais sobre ${tema.toLowerCase()}.`,
-      `Nos últimos anos, ${tema.toLowerCase()} ganhou destaque social.`
-    ]) +
-    " " +
-    escolher([
-      `Esse tema merece reflexão.`,
-      `Esse assunto afeta a sociedade.`,
-      `Dessa forma, torna-se importante analisá-lo.`
-    ])
-  );
+function r(a){return a[Math.floor(Math.random()*a.length)]}
+function limpar(t){
+  const p=t.split(" "),s=new Set();
+  return p.filter(w=>{let k=w.toLowerCase();if(s.has(k)&&k.length>4)return false;s.add(k);return true}).join(" ");
 }
 
-function desenvolvimento(tema){
-  return evitarRepeticao(
-    escolher([
-      `Primeiramente, ${tema.toLowerCase()} influencia o cotidiano.`,
-      `Além disso, ${tema.toLowerCase()} gera impactos sociais.`,
-      `Outro ponto relevante é que ${tema.toLowerCase()} afeta a coletividade.`
-    ]) +
-    " " +
-    escolher([
-      `Isso ocorre por fatores sociais.`,
-      `Tal situação é agravada pela falta de conscientização.`,
-      `Esses fatores contribuem para o problema.`
-    ]) +
-    " " +
-    escolher([
-      `Assim, compreender essa questão é essencial.`,
-      `Portanto, o debate se torna necessário.`,
-      `Dessa maneira, a reflexão é indispensável.`
-    ])
-  );
-}
+function intro(t){return limpar(r([
+  `Na sociedade atual, ${t.toLowerCase()} tornou-se um tema relevante.`,
+  `Diante do cenário contemporâneo, discutir ${t.toLowerCase()} é essencial.`,
+  `Nos últimos anos, ${t.toLowerCase()} ganhou destaque social.`
+])+" "+r([
+  `Esse assunto merece reflexão crítica.`,
+  `Tal debate impacta diretamente a coletividade.`,
+  `Essa questão envolve fatores sociais importantes.`
+]))}
 
-function conclusao(tema){
-  return evitarRepeticao(
-    escolher([
-      `Portanto, ${tema.toLowerCase()} exige atenção da sociedade.`,
-      `Diante disso, percebe-se a importância de discutir ${tema.toLowerCase()}.`,
-      `Assim, torna-se evidente a relevância desse tema.`
-    ]) +
-    " " +
-    escolher([
-      `O debate consciente contribui para avanços sociais.`,
-      `Refletir sobre esse assunto é fundamental.`,
-      `A análise crítica favorece melhorias coletivas.`
-    ])
-  );
-}
+function dev(t){return limpar(r([
+  `Sob essa perspectiva, ${t.toLowerCase()} apresenta consequências significativas.`,
+  `Além disso, ${t.toLowerCase()} influencia o comportamento social.`,
+  `Nesse contexto, observa-se que ${t.toLowerCase()} afeta a sociedade.`
+])+" "+r([
+  `Isso ocorre devido a fatores históricos e culturais.`,
+  `A falta de conscientização agrava esse cenário.`,
+  `Aspectos sociais contribuem para esse problema.`
+])+" "+r([
+  `Assim, compreender essa realidade é fundamental.`,
+  `Portanto, o debate torna-se necessário.`,
+  `Dessa forma, é preciso refletir criticamente.`
+]))}
 
-function notaSimulada(){ return Math.floor(700+Math.random()*300); }
+function concl(t){return limpar(r([
+  `Em síntese, ${t.toLowerCase()} possui grande relevância social.`,
+  `Portanto, torna-se evidente a importância desse tema.`,
+  `Diante disso, é fundamental refletir sobre essa questão.`
+])+" "+r([
+  `A conscientização contribui para avanços positivos.`,
+  `O pensamento crítico favorece melhorias coletivas.`,
+  `O debate responsável promove desenvolvimento social.`
+]))}
 
-function avaliacaoProfessor(){
-  return `
+function gerar(){
+  const t=tema.value.trim();
+  if(!t)return alert("Digite ou escolha um tema");
+
+  textoFinal=
+`REDAÇÃO
+
+Tema: ${t}
+
+Introdução:
+${intro(t)}
+
+Desenvolvimento:
+${dev(t)}
+
+${dev(t)}
+
+Conclusão:
+${concl(t)}
+
+Nota simulada: ${Math.floor(700+Math.random()*300)}
+`;
+
+  if(modo==="professor"){
+    textoFinal+=`
+--------------------
 AVALIAÇÃO DO PROFESSOR
 
 Clareza: ${Math.floor(7+Math.random()*3)}/10
@@ -155,63 +173,53 @@ Linguagem: ${Math.floor(7+Math.random()*3)}/10
 Estrutura: ${Math.floor(7+Math.random()*3)}/10
 
 Comentário:
-O texto apresenta boa organização, ideias claras e desenvolvimento adequado ao tema. 
-Pode melhorar com exemplos mais específicos e aprofundamento argumentativo.
+Texto bem organizado e coerente. Pode melhorar com exemplos mais específicos.
 `;
-}
-
-function gerarRedacao(){
-  const tema=document.getElementById("tema").value.trim();
-  const modo=document.getElementById("modo").value;
-  const nivel=document.getElementById("nivel").value;
-  if(!tema){resultado.innerText="Digite um tema.";return;}
-
-  let intro=introducao(tema);
-  let dev1=desenvolvimento(tema);
-  let dev2=desenvolvimento(tema);
-  let concl=conclusao(tema);
-
-  textoFinal =
-`REDAÇÃO – ${nivel.toUpperCase()}
-
-Tema: ${tema}
-
-Introdução:
-${intro}
-
-Desenvolvimento:
-${dev1}
-
-${dev2}
-
-Conclusão:
-${concl}
-
-Nota simulada: ${notaSimulada()}
-`;
-
-  if(modo==="professor"){
-    textoFinal += "\n" + avaliacaoProfessor();
   }
 
   resultado.innerText=textoFinal;
 }
 
-function imprimir(){
-  if(!textoFinal)return alert("Gere primeiro.");
-  let w=window.open("");
-  w.document.write("<pre>"+textoFinal+"</pre>");
-  w.print();
+// SALVAR REDAÇÃO
+function salvar(){
+  if(!textoFinal)return alert("Gere uma redação primeiro");
+  const lista=JSON.parse(localStorage.getItem("redacoes")||"[]");
+  lista.push(textoFinal);
+  localStorage.setItem("redacoes",JSON.stringify(lista));
+  carregarSalvos();
+  alert("Redação salva!");
 }
 
-function gerarPDF(){
-  if(!textoFinal)return alert("Gere primeiro.");
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF();
-  const linhas=doc.splitTextToSize(textoFinal,180);
-  doc.text(linhas,10,20);
-  doc.save("Redacao.pdf");
+function carregarSalvos(){
+  const div=document.getElementById("salvos");
+  div.innerHTML="";
+  const lista=JSON.parse(localStorage.getItem("redacoes")||"[]");
+  lista.forEach((r,i)=>{
+    const d=document.createElement("div");
+    d.className="item";
+    d.innerText=`Redação ${i+1}`;
+    d.onclick=()=>{resultado.innerText=r;textoFinal=r};
+    div.appendChild(d);
+  });
 }
-</script>
+
+// BANCO DE TEMAS
+function carregarBanco(){
+  const div=document.getElementById("banco");
+  temasPadrao.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="item";
+    d.innerText=t;
+    d.onclick=()=>tema.value=t;
+    div.appendChild(d);
+  });
+}
+
+function imprimir(){
+  if(!textoFinal)return;
+  let w=window.open("");w.document.write("<pre>"+textoFinal+"</pre>");w.print();}
+
+function pdf(){ if(!textoFinal)return; const {jsPDF}=window.jspdf; const d=new jsPDF(); d.text(d.splitTextToSize(textoFinal,180),10,20); d.save("Redacao.pdf"); } </script>
+
 </body>
 </html>
