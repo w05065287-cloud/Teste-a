@@ -1,220 +1,244 @@
- <!DOCTYPE html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Documentos IA</title>
-    <style>
-        :root {
-            --primary: #2A2F4F;
-            --secondary: #917FB3;
-            --light: #FDE2F3;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Docs</title>
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            min-height: 100vh;
-            color: var(--primary);
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+* { box-sizing: border-box; }
 
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 30px;
-        }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg,#1f2937,#111827);
+  color: #111;
+}
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
 
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid var(--secondary);
-            border-radius: 8px;
-            resize: vertical;
-            min-height: 100px;
-            font-size: 16px;
-        }
+header {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 30px;
+}
 
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.3s, background 0.3s;
-            display: block;
-            margin: 0 auto;
-        }
+header h1 {
+  font-size: 2.2rem;
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            background: var(--secondary);
-        }
+.status {
+  background: #111827;
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  margin-top: 10px;
+}
 
-        .document-output {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--light);
-            border-radius: 8px;
-            white-space: pre-wrap;
-            position: relative;
-        }
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.15);
+}
 
-        .loading {
-            animation: pulse 1.5s infinite;
-            text-align: center;
-            display: none;
-        }
+textarea,input,select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+}
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+textarea { resize: vertical; }
 
-        .download-btn {
-            background: #4CAF50;
-            margin-top: 10px;
-        }
+button {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-        }
-    </style>
+.btn-main {
+  background: linear-gradient(135deg,#2563eb,#1d4ed8);
+  color: white;
+}
+
+.btn-outline {
+  background: #f3f4f6;
+}
+
+.planos {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.plano {
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+.plano h3 {
+  margin: 0;
+}
+
+.plano strong {
+  font-size: 1.4rem;
+}
+
+.aviso {
+  font-size: 13px;
+  background: #fef3c7;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+#juridico { display:none; border:2px dashed #ef4444; }
+
+#pixBox { display:none; border:2px dashed #22c55e; text-align:center; }
+
+@media print {
+  button,input,select { display:none; }
+  body { background:white; }
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>📄 Gerador de Documentos IA</h1>
-        
-        <div class="input-group">
-            <textarea id="userInput" placeholder="Descreva o documento que precisa (ex: Contrato de locação residencial por 12 meses...)" autofocus></textarea>
-        </div>
 
-        <button onclick="generateDocument()">Gerar Documento</button>
-        <div class="loading">⏳ Processando sua solicitação...</div>
+<div class="container">
 
-        <div class="document-output" id="output">
-            Seu documento aparecerá aqui...
-        </div>
+<header>
+  <h1>📄 IA Docs</h1>
+  <div class="status">Plano: <strong id="statusPlano">FREE</strong></div>
+</header>
+
+<div class="card aviso">
+⚠️ As respostas da IA podem conter erros. Sempre revise informações importantes.
+</div>
+
+<div class="card">
+  <input id="apiKey" placeholder="API Key do Google Gemini">
+  <textarea id="inputText" rows="6" placeholder="Digite seu texto aqui"></textarea>
+  <button class="btn-main" onclick="processarIA()">Processar com IA</button>
+  <button class="btn-outline" onclick="window.print()">Imprimir / PDF</button>
+</div>
+
+<div class="card">
+  <h3>Resultado</h3>
+  <div id="output"></div>
+</div>
+
+<div class="card" id="planos">
+  <h2>💎 Planos Premium</h2>
+  <div class="planos">
+    <div class="plano">
+      <h3>Mensal</h3>
+      <strong>R$ 19,99</strong>
+      <button class="btn-main" onclick="comprarPlano('mensal')">Assinar</button>
     </div>
+    <div class="plano">
+      <h3>Anual</h3>
+      <strong>R$ 239,88</strong>
+      <button class="btn-main" onclick="comprarPlano('anual')">Assinar</button>
+    </div>
+  </div>
+</div>
 
-    <script>
-        // Modelo de IA simplificado
-        const documentTemplates = {
-            contrato: (details) => `CONTRATO DE ${details.tipo.toUpperCase()}
+<div class="card" id="pixBox">
+  <h2>💠 PIX (Simulação)</h2>
+  <textarea id="pixCopia" readonly></textarea>
+  <img id="pixQr" width="200">
+  <button class="btn-main" onclick="confirmarPix()">Já paguei (simulação)</button>
+</div>
 
-Partes envolvidas: [NOME DO LOCADOR] e [NOME DO LOCATÁRI]
-Duração: ${details.duracao}
-Valor: ${details.valor || 'a combinar'}
-Cláusulas principais:
-1. Objeto do contrato
-2. Prazo e renovação
-3. Responsabilidades das partes
-4. Multa por descumprimento
+<div class="card" id="juridico">
+  <h2>⚖️ Jurídico Educacional</h2>
+  <select id="acaoJuridica">
+    <option value="Resumo jurídico simples">Resumo jurídico</option>
+    <option value="Explicação em linguagem simples">Explicação simples</option>
+    <option value="Organização de fatos">Organizar fatos</option>
+  </select>
+  <button class="btn-main" onclick="processarJuridico()">Processar Jurídico</button>
+  <p class="aviso">⚠️ Não substitui advogado.</p>
+</div>
 
-Assinaturas: ___________________________`,
+</div>
 
-            ata: (details) => `ATA DE REUNIÃO - ${details.tema.toUpperCase()}
+<script>
+const SISTEMA = { plano:'free' };
 
-Data: ${new Date().toLocaleDateString()}
-Participantes: [LISTA DE PARTICIPANTES]
+function setPlano(p){
+  SISTEMA.plano = p;
+  statusPlano.innerText = p.toUpperCase();
+}
 
-Pauta:
-1. ${details.pauta1}
-2. ${details.pauta2}
+function comprarPlano(tipo){
+  const valor = tipo==='mensal'?'1999':'23988';
+  const pix =
+  "00020126360014BR.GOV.BCB.PIX0111teste@pix.com52040000530398654"+
+  valor+"5802BR5920IA DOCS TESTE6009SAO PAULO6304FAKE";
 
-Decisões tomadas:
-- ${details.decisoes || 'A ser preenchido'}`,
+  pixCopia.value = pix;
+  pixQr.src =
+   "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+
+   encodeURIComponent(pix);
 
-            carta: (details) => `${details.destinatario ? `À ${details.destinatario}` : ''}
+  pixBox.style.display='block';
+}
 
-Assunto: ${details.assunto}
+function confirmarPix(){
+  setPlano('premium');
+  juridico.style.display='block';
+  planos.style.display='none';
+  pixBox.style.display='none';
+  alert("Premium liberado (simulação)");
+}
 
-Corpo do documento:
-${details.corpo || '[Conteúdo da carta]'}
+async function processarIA(){
+  if(!apiKey.value || !inputText.value)
+    return alert("Preencha o texto e a API Key");
 
-Atenciosamente,
-[Seu Nome]
-[Seu Contato]`
-        };
+  const res = await fetch(
+   "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key="+apiKey.value,
+   {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:inputText.value}]}]})
+   }
+  );
 
-        function detectDocumentType(text) {
-            text = text.toLowerCase();
-            if (text.includes('contrato')) return 'contrato';
-            if (text.includes('ata')) return 'ata';
-            if (text.includes('carta')) return 'carta';
-            return 'geral';
-        }
+  const data = await res.json();
+  output.innerText =
+   data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro";
+}
 
-        function simpleAI(text) {
-            const type = detectDocumentType(text);
-            const details = {
-                tipo: text.match(/contrato de (\w+)/i)?.[1] || 'locação',
-                duracao: text.match(/\d+/)?.[0] + ' meses' || 'período indeterminado',
-                valor: text.match(/R\$\s?\d+/)?.[0],
-                tema: text.match(/tema: (.+)/i)?.[1] || 'Assunto principal',
-                assunto: text.match(/assunto: (.+)/i)?.[1] || 'Assunto não especificado'
-            };
+function processarJuridico(){
+  if(SISTEMA.plano!=='premium')
+    return alert("Apenas Premium");
 
-            return documentTemplates[type]?.(details) || "Documento padrão:\n\n[Insira seu conteúdo aqui]";
-        }
+  inputText.value =
+   "Explique juridicamente:\n" + inputText.value;
+  processarIA();
+}
+</script>
 
-        async function generateDocument() {
-            const userInput = document.getElementById('userInput').value;
-            const output = document.getElementById('output');
-            const loading = document.querySelector('.loading');
-
-            if (!userInput.trim()) {
-                alert('Por favor, descreva o documento necessário');
-                return;
-            }
-
-            loading.style.display = 'block';
-            output.textContent = '';
-
-            // Simulação de processamento
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            const generatedDoc = simpleAI(userInput);
-            output.textContent = generatedDoc;
-
-            loading.style.display = 'none';
-            addDownloadButton(generatedDoc);
-        }
-
-        function addDownloadButton(content) {
-            const btn = document.createElement('button');
-            btn.className = 'download-btn';
-            btn.innerHTML = '⬇️ Download';
-            btn.onclick = () => {
-                const blob = new Blob([content], {type: 'text/plain'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `documento-gerado-${Date.now()}.txt`;
-                a.click();
-            };
-            output.appendChild(btn);
-        }
-    </script>
 </body>
 </html>
