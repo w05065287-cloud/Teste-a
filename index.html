@@ -1,6 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Docs Premium</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f4f4f4;
+  }
+
+  h1 { text-align: center; }
+
+  textarea, input, select, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  button {
+    cursor: pointer;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+  }
+
+  button:hover {
+    opacity: 0.9;
+  }
+
+  .box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+
+  #juridico {
+    border: 2px dashed red;
+    display: none;
+  }
+
+  #planos {
+    border: 2px solid #333;
+  }
+
+  .aviso {
+    font-size: 13px;
+    color: #555;
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .aviso-juridico {
+    font-size: 12px;
+    color: #a00;
+    margin-top: 10px;
+  }
+
+  #output {
+    white-space: pre-wrap;
+  }
+
+  @media print {
+    button, select, input {
+      display: none;
+    }
+    body {
+      background: white;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<h1>📄 IA para Documentos</h1>
+<p>Status do plano: <strong id="statusPlano">FREE</strong></p>
+
+<p class="aviso">
+⚠️ <strong>Aviso:</strong><br>
+Conteúdo gerado por IA pode conter erros ou imprecisões.
+Sempre revise antes de usar oficialmente.
+</p>
+
+<div class="box">
+  <label>🔑 API Key do Google Gemini</label>
+  <input id="apiKey" placeholder="Cole sua API Key aqui">
+
+  <label>✍️ Texto</label>
+  <textarea id="inputText" rows="8" placeholder="Digite o texto ou pedido"></textarea>
+
+  <button onclick="processarIA()">Processar com IA</button>
+  <button onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>
+
+<div class="box">
+  <h2>📤 Resultado</h2>
+  <div id="output">Aguardando...</div>
+</div>
+
+<!-- PLANOS -->
+<div id="planos" class="box">
+  <h2>💎 Planos Premium</h2>
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div style="border:1px solid #aaa;padding:15px;border-radius:8px;width:200px">
+      <h3>Plano Mensal</h3>
+      <p><strong>R$ 19,99 / mês</strong></p>
+      <button onclick="comprarPlano('mensal')">Assinar</button>
+    </div>
+
+    <div style="border:1px solid #aaa;padding:15px;border-radius:8px;width:200px">
+      <h3>Plano Anual</h3>
+      <p><strong>R$ 239,88 / ano</strong></p>
+      <button onclick="comprarPlano('anual')">Assinar</button>
+    </div>
+  </div>
+</div>
+
+<!-- JURÍDICO -->
+<div id="juridico" class="box">
+  <h2>⚖️ Jurídico Educacional (Premium)</h2>
+
+  <select id="acaoJuridica">
+    <option value="resumo">Resumo do texto</option>
+    <option value="explicacao">Explicar em linguagem simples</option>
+    <option value="organizacao">Organizar fatos e pedidos</option>
+  </select>
+
+  <button onclick="processarJuridico()">Processar Jurídico</button>
+
+  <p class="aviso-juridico">
+  ⚠️ Este recurso é educacional e não substitui advogado ou decisão judicial.
+  </p>
+</div>
+
+<script>
+/* ======================
+   CONTROLE DO SISTEMA
+====================== */
+const SISTEMA = {
+  plano: "free"
+};
+
+function setPlano(plano) {
+  SISTEMA.plano = plano;
+  document.getElementById("statusPlano").innerText = plano.toUpperCase();
+}
+
+function comprarPlano(tipo) {
+  setPlano("premium");
+  document.getElementById("juridico").style.display = "block";
+  document.getElementById("planos").style.display = "none";
+
+  alert(
+    tipo === "mensal"
+      ? "Plano Mensal ativado!"
+      : "Plano Anual ativado!"
+  );
+}
+
+/* ======================
+   IA NORMAL
+====================== */
 async function processarIA() {
-  const texto = document.getElementById("inputText").value.trim();
-  const key = document.getElementById("apiKey").value.trim();
+  const texto = inputText.value.trim();
+  const key = apiKey.value.trim();
   const output = document.getElementById("output");
 
   if (!texto || !key) {
@@ -8,21 +179,17 @@ async function processarIA() {
     return;
   }
 
-  output.innerText = "⏳ Gerando texto com IA...";
+  output.innerText = "⏳ Gerando texto...";
 
   try {
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + key,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
-            {
-              parts: [{ text: texto }]
-            }
+            { parts: [{ text: texto }] }
           ]
         })
       }
@@ -30,7 +197,6 @@ async function processarIA() {
 
     const data = await res.json();
 
-    // 👉 MOSTRA ERRO REAL DA API
     if (data.error) {
       output.innerText = "❌ Erro da IA: " + data.error.message;
       return;
@@ -38,9 +204,70 @@ async function processarIA() {
 
     output.innerText =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "⚠️ A IA não retornou resposta.";
+      "⚠️ Sem resposta da IA.";
 
-  } catch (erro) {
-    output.innerText = "❌ Erro de conexão: " + erro.message;
+  } catch (e) {
+    output.innerText = "❌ Erro de conexão: " + e.message;
   }
 }
+
+/* ======================
+   IA JURÍDICA (PREMIUM)
+====================== */
+async function processarJuridico() {
+  if (SISTEMA.plano !== "premium") {
+    alert("Recurso exclusivo do plano Premium");
+    return;
+  }
+
+  const texto = inputText.value.trim();
+  const key = apiKey.value.trim();
+  const acao = acaoJuridica.value;
+  const output = document.getElementById("output");
+
+  if (!texto || !key) {
+    alert("Texto e API Key são obrigatórios");
+    return;
+  }
+
+  output.innerText = "⏳ Processando jurídico...";
+
+  const prompt =
+`Você é um assistente jurídico educacional.
+Ação: ${acao}
+Texto:
+${texto}`;
+
+  try {
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + key,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            { parts: [{ text: prompt }] }
+          ]
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.error) {
+      output.innerText = "❌ Erro da IA: " + data.error.message;
+      return;
+    }
+
+    output.innerText =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "⚠️ Sem resposta jurídica.";
+
+  } catch (e) {
+    output.innerText = "❌ Erro de conexão: " + e.message;
+  }
+}
+</script>
+
+</body>
+</html>
